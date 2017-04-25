@@ -206,9 +206,15 @@ var empty = []byte("")
 
 // ValidatePacket validates a carbon message and returns useful pieces of it
 func ValidatePacket(buf []byte, levelLegacy ValidationLevelLegacy, levelM20 ValidationLevelM20) ([]byte, float64, uint32, error) {
-	fields := bytes.Fields(buf)
+	fields := bytes.Split(buf, []byte(" "))
 	if len(fields) != 3 {
-		return empty, 0, 0, errWrongNumFields
+		// seems there are unnecessary spaces in buf.
+		fields = bytes.Fields(buf)
+
+		// still broken, return error
+		if len(fields) != 3 {
+			return empty, 0, 0, errWrongNumFields
+		}
 	}
 
 	version := GetVersionB(fields[0])
